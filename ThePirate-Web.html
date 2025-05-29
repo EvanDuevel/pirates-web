@@ -154,7 +154,7 @@
         selectedDiv.classList.remove('hidden');
         selectedDiv.classList.add('visible');
       }
-
+      
       const displayWebTorrents = (torrents, resultsDiv) => {
         // Detect if the device is mobile
         const isMobile = window.innerWidth <= 768;
@@ -309,7 +309,6 @@
         reader.onload = (e) => {
           const arrayBuffer = e.target.result;
           const chunkSize = 16384; // 16KB chunks
-
           // Send the file size and name first (as a metadata message)
           const metadata = JSON.stringify({ type: 'meta', size: file.size, name: file.name });
           dataChannel.send(metadata);
@@ -666,6 +665,17 @@
         document.getElementById('messages').innerText = messages;
       };
 
+      window.showTab = function(tabId, btn) {
+        // Hide all articles
+        document.querySelectorAll("#news .tab").forEach(tab => tab.style.display = "none");
+        // Show the selected article
+        document.getElementById(tabId).style.display = "block";
+        // Remove 'active' from all buttons
+        document.querySelectorAll("#news .nav button").forEach(button => button.classList.remove("active"));
+        // Add 'active' to the clicked button
+        btn.classList.add("active");
+      };
+
       document.addEventListener('DOMContentLoaded', () => {
 
         window.addEventListener("beforeunload", async (event) => {
@@ -705,7 +715,6 @@
 
         // Preview Image Input
         document.getElementById('previewImage').addEventListener('change', (e) => {
-            file = e.target.files[0];
             if (file) {
                 console.log('Preview Image:', file.name);
             }
@@ -782,11 +791,13 @@
       footer {
         margin-top: 20px;
       }
+      
 
       .block {
         position: relative;
-        background: #ffd59a;
+        background: #f6e2c6;
         text-align: left;
+        margin: 22px;
       }
 
       .block:before, .block:after {
@@ -794,8 +805,8 @@
         position: absolute;
         left: -4px;
         top: -4px;
-        background: linear-gradient(45deg, #ffc497, #ff8e38, #b77c50,#ffcda7, #F5F1EE, #9b742a, 
-          #a26638, #d18042,#F5F1EE, #F5F1EE);
+        background: linear-gradient(45deg, #f2ff62, #ff8e38, #b77c50,#ffcda7, #ffdd47, #ffd558, 
+          #f7bb5b, #ffce51,#F5F1EE, #F5F1EE);
         background-size: 400%;
         width: calc(100% + 10px);
         height: calc(100% + 10px);
@@ -928,6 +939,68 @@
       audio {
         display: none;
       }
+
+      #news .nav {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+      #news .nav button {
+        padding: 12px;
+        font-size: 16px;
+        border: none;
+        background-color: #007f5f;
+        color: white;
+        cursor: pointer;
+        border-radius: 5px;
+        box-shadow: 2px 2px 4px #999;
+        transition: all 0.1s ease-in-out;
+      }
+      #news .nav button:hover {
+        background-color: #005f46;
+      }
+      #news .nav button.active {
+        box-shadow: inset 2px 2px 4px #666;
+        transform: translateY(2px);
+      }
+      #news .tab {
+        display: none;
+        max-width: 800px;
+        min-width: 800px;
+        min-height: 340px;
+        max-height: 340px;
+        padding: 20px;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: left;
+        margin-bottom: 20px;
+        box-sizing: border-box;
+        overflow: auto;
+      }
+
+      /* Responsive: Make news square fit mobile screens */
+      @media (max-width: 900px) {
+        #news .tab {
+          max-width: 98vw;
+          min-width: 0;
+          min-height: 220px;
+          max-height: none;
+          padding: 10px;
+        }
+      }
+      #news .meta {
+        font-size: 14px;
+        color: #666;
+      }
+      #news .article-content {
+        line-height: 1.6;
+      }
+      #news .footer {
+        margin-top: 20px;
+        font-size: 12px;
+        color: #888;
+      }
     </style>
 </head>
 <body>
@@ -966,7 +1039,7 @@
       </header>
       <main>     
         <div class="input-group mb-3 d-flex justify-content-center" style="align-items: center; margin-top: 10px;">
-          <input type="text" id="searchInputBox" class="form-control" placeholder="Search" value="Pirates of the Caribean" style="max-width: 200px; margin-left: 10px;">
+          <input type="text" id="searchInputBox" class="form-control" placeholder="Pirates of the Caribean" value="" style="max-width: 200px; margin-left: 10px;">
           <button class="raised-button" style="margin-left: 10px;" onclick="searchWebTorrents()">Search</button>
         </div>   
         <div class="coptions">
@@ -984,7 +1057,7 @@
     <div class="hidden" id="results">
     </div>
     <div class="hidden block" id="upload">
-      <div style="padding: 30px;">
+      <div>
           <div class="form-group" style="width: 80%;">
               <label for="nameInput" class="font-weight-bold">Name</label>
               <input type="text" class="form-control" id="nameInput" placeholder="Enter name" required>
@@ -1007,10 +1080,10 @@
                 <label class="custom-file-label" for="fileInput" id="fileUploadLabel">Choose file...</label>
             </div>
           </div>
-          <div class="form-group" style="width: 85%;">
+          <div class="form-group" style="width: 70%;">
             <label for="previewImage" class="font-weight-bold">Upload Preview Image</label>
             <div class="custom-file">
-                <input type="file" class="custom-file-input" id="previewImage" required>
+                <input type="file" class="custom-file-input" id="previewImage" accept="image/*">
                 <label class="custom-file-label" for="previewImage" id="previewImageLabel">Preview Image (optional)</label>
             </div>
           </div>
@@ -1018,22 +1091,43 @@
       </div>
       <a href="javascript:void(0);" style="padding: 0 0 10px 30px; display: inline-block; text-align: left;" onclick="showDiv('search')">Back</a>
     </div>  
-    <div class="hidden" id="news" style="font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; text-align: left;">
-      <h1 style="color: #333; text-align: left;">Breaking News: Tech Innovation: The Pirate Web</h1>
-      <p class="meta" style="font-size: 14px; color: #666; text-align: left;">By Alex Johnson | Published on May 23, 2025</p>
-      
-      <div class="article-content" style="line-height: 1.6; text-align: left;">
-          <p style="text-align: left;">Similar to the Pirate Bay, the Pirate Web allows peer-to-peer file transfer.</p>
-          
-          <p style="text-align: left;">This website will make it easy to transfer files from person to person all via the browser.</p>
-          
-          <p style="text-align: left;">Additionally, it will allow searching for files based on title and filtering based on file type.</p>
-          
-          <p style="text-align: left;">While some challenges remain, the Pirate Web has launched and is available at the url <a href="https://thepirate-web.w3spaces.com">thepirate-web.w3spaces.com</a>.</p>
-          <a href="javascript:void(0);" onclick="showDiv('search')" style="text-align: left;">Back</a>
+    <div class="hidden" id="news" style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; text-align: left;">
+      <div class="nav" style="margin-bottom: 15px;">
+          <button onclick="showTab('worldNews', this)" id="btn-world">World News</button>
+          <button onclick="showTab('technologyNews', this)" id="btn-tech">Technology</button>
+          <button onclick="showTab('sportsNews', this)" id="btn-sports">Sports</button>
+          <button onclick="showDiv('search')" style="margin-left: auto; background:#0c79ff;">Back</button>
       </div>
 
-      <p class="footer" style="margin-top: 20px; font-size: 12px; color: #888; text-align: left;">© 2025 News Network | All rights reserved.</p>
+      <div id="worldNews" class="tab" style="display: block;">
+          <h1 style="color: #007f5f; margin-left: 10px;">Breaking News: Global Affairs Update</h1>
+          <p class="meta">By Jane Doe | Published on May 28, 2025</p>
+          <div class="article-content">
+              <p>World leaders gather for a high-stakes summit on climate change, aiming to set new sustainability goals.</p>
+              <p>Diplomatic tensions rise as trade negotiations continue between major economies.</p>
+          </div>
+          <p class="footer">© 2025 News Network | All rights reserved.</p>
+      </div>
+
+      <div id="technologyNews" class="tab">
+          <h1 style="color: #007f5f; margin-left: 10px;">Breaking News: Tech Innovation Revolution</h1>
+          <p class="meta">By Alex Johnson | Published on May 28, 2025</p>
+          <div class="article-content">
+              <p>AI-driven automation reshapes industries, as companies invest in cutting-edge tech solutions.</p>
+              <p>The rise of quantum computing sparks debates on data security and encryption.</p>
+          </div>
+          <p class="footer">© 2025 News Network | All rights reserved.</p>
+      </div>
+
+      <div id="sportsNews" class="tab">
+          <h1 style="color: #007f5f; margin-left: 10px;">Breaking News: Sports Championship</h1>
+          <p class="meta">By Chris Williams | Published on May 28, 2025</p>
+          <div class="article-content">
+              <p>An underdog team secures victory in a nail-biting championship finale, stunning fans worldwide.</p>
+              <p>Top athletes gear up for the upcoming Olympic Games, promising record-breaking performances.</p>
+          </div>
+          <p class="footer">© 2025 News Network | All rights reserved.</p>
+      </div>
     </div>
   </div>
 </body>
