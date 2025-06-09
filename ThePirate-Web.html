@@ -171,15 +171,17 @@
 
         if (isMobile) {
             resultsDiv.innerHTML = `
-                <div class="square-container"></div>
-                <div class="buttons" style="margin-top: 50px">
-                    <a class="card-button" onclick="prevSquare()">⬅ Prev | </a>
-                    <a href="javascript:void(0);" onclick="showDiv('search')">Back</a>
-                    <a class="card-button" onclick="nextSquare()"> | Next ➡</a>
-                </div>
+              <div class="square-container"></div>
+              <div class="buttons" style="margin-top: 50px; display: flex; justify-content: center; align-items: center; gap: 8px;">
+                  <p class="card-button" onclick="prevSquare()" style="color: #fff; background: #007bff; border-radius: 6px; padding: 8px 18px; margin: 0 2px; font-weight: bold; font-size: 1.1em; cursor: pointer; display: inline-block; border: none;">⬅</p>
+                  <p class="card-button" onclick="showDiv('search')" style="color: #fff; background: #007bff; border-radius: 6px; padding: 8px 18px; margin: 0 2px; font-weight: bold; font-size: 1.1em; cursor: pointer; display: inline-block; border: none;">Back</p>
+                  <p class="card-button" onclick="nextSquare()" style="color: #fff; background: #007bff; border-radius: 6px; padding: 8px 18px; margin: 0 2px; font-weight: bold; font-size: 1.1em; cursor: pointer; display: inline-block; border: none;">➡</p>
+              </div>
             `;
 
             const cardContainer = resultsDiv.querySelector(".square-container");
+            cardContainer.innerHTML = "";
+            squares = [];
 
             torrents.forEach(async (data, index) => {
                 const docRef = doc(db, "web-torrents", data.id);
@@ -792,12 +794,11 @@
         margin-top: 20px;
       }
       
-
       .block {
         position: relative;
         background: #f6e2c6;
         text-align: left;
-        margin: 22px;
+        padding: 20px;
       }
 
       .block:before, .block:after {
@@ -1056,8 +1057,8 @@
     </div>
     <div class="hidden" id="results">
     </div>
-    <div class="hidden block" id="upload">
-      <div>
+    <div class="hidden" id="upload">
+      <div class="block">
           <div class="form-group" style="width: 80%;">
               <label for="nameInput" class="font-weight-bold">Name</label>
               <input type="text" class="form-control" id="nameInput" placeholder="Enter name" required>
@@ -1088,15 +1089,14 @@
             </div>
           </div>
           <button class="raised-button" onclick="SeedWebTorrent()">Upload Web Torrent</button>
+          <a href="javascript:void(0);" style="padding: 0 0 10px 30px; display: inline-block; text-align: left;" onclick="showDiv('search')">Back</a>
       </div>
-      <a href="javascript:void(0);" style="padding: 0 0 10px 30px; display: inline-block; text-align: left;" onclick="showDiv('search')">Back</a>
     </div>  
     <div class="hidden" id="news" style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; text-align: left;">
       <div class="nav" style="margin-bottom: 15px;">
           <button onclick="showTab('worldNews', this)" id="btn-world">World News</button>
           <button onclick="showTab('technologyNews', this)" id="btn-tech">Technology</button>
           <button onclick="showTab('sportsNews', this)" id="btn-sports">Sports</button>
-          <button onclick="showDiv('search')" style="margin-left: auto; background:#0c79ff;">Back</button>
       </div>
 
       <div id="worldNews" class="tab" style="display: block;">
@@ -1128,6 +1128,8 @@
           </div>
           <p class="footer">© 2025 News Network | All rights reserved.</p>
       </div>
+
+      <a onclick="showDiv('search')" style="margin-left: auto; color: blue;">Back</a>
     </div>
   </div>
 </body>
